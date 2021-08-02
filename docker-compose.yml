@@ -1,0 +1,26 @@
+version: "3"
+
+services:
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_DB=template
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+  app:
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./src:/app/src
+    ports:
+      - "4000:4000"
+    depends_on:
+      - db
+    environment:
+      - POSTGRES_DB=template
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_HOST=db
