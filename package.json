@@ -38,10 +38,10 @@
     "typeorm": "0.2.34"
   },
   "scripts": {
-    "start": "node dist/server.js",
+    "build": "tsc && (cd frontend && yarn && yarn build)",
+    "start": "node ./dist/server.js",
     "predev": "yarn run swagger",
     "prebuild": "yarn run swagger",
-    "build": "tsc -c",
     "dev": "ts-node-dev src/server.ts",
     "swagger": "tsoa spec"
   }
