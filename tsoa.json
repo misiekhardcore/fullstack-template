@@ -1,0 +1,21 @@
+{
+  "entryFile": "src/server.ts",
+  "noImplicitAdditionalProperties": "throw-on-extras",
+  "controllerPathGlobs": ["src/controllers/**/*.ts"],
+  "spec": {
+    "securityDefinitions": {
+      "jwt": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header"
+      }
+    },
+    "outputDirectory": "public",
+    "specVersion": 3
+  },
+  "routes": {
+    "authenticationModule": "src/middlewares/auth.ts",
+    "routesDir": "src/routes"
+  },
+  "ignore": ["**/node_modules/**/lodash/**"]
+}
