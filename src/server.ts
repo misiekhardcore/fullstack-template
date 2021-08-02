@@ -6,28 +6,26 @@ import express, {
   Response,
 } from "express";
 import morgan from "morgan";
+import passport from "passport";
+import { join } from "path";
 import "reflect-metadata";
 import swaggerUi from "swagger-ui-express";
 import { ValidateError } from "tsoa";
 import { createConnection } from "typeorm";
 import dbConfig from "./config/database";
-import { RegisterRoutes } from "./routes/routes";
-// import userRouter from "./routes/user";
-// import productRouter from "./routes/product";
-import passport from "passport";
 import { authenticateUser } from "./middlewares/auth";
-// import "./middlewares/authentication";
+import { RegisterRoutes } from "./routes/routes";
 
-//run dotenv config
+// Run dotenv config
 config();
 
-//get PORT from .env
+// Get PORT from .env
 const PORT = process.env.PORT || 4000;
 
-//create express app
+// Create express app
 const app: Application = express();
 
-//set basic middlewares
+// Set basic middlewares
 app.use(express.json());
 app.use(morgan("tiny"));
 app.use(express.static("public"));
@@ -55,9 +53,9 @@ app.use(passport.initialize());
 //   await generateRoutes(routeOptions);
 // })();
 
-//prepare Swagger endpoint
+// Prepare Swagger endpoint
 app.use(
-  "/docs",
+  "/docs/api",
   swaggerUi.serve,
   swaggerUi.setup(undefined, {
     swaggerOptions: {
@@ -66,18 +64,20 @@ app.use(
   })
 );
 
-//use TSOA generated router
+// Use TSOA generated router
 RegisterRoutes(app);
-// app.use(userRouter);
-// app.use(productRouter);
 
-//handle validation errors
+// Serve JSDoc files
+app.use("/docs/code", express.static(join(__dirname, "../out")));
+
+// Handle errors
 app.use(function errorHandler(
   err: unknown,
   req: Request,
   res: Response,
   next: NextFunction
 ): Response | void {
+  // Catch ValidateErrors
   if (err instanceof ValidateError) {
     console.warn(
       `Caught Validation Error for ${req.path}:`,
@@ -88,6 +88,7 @@ app.use(function errorHandler(
       details: err.fields,
     });
   }
+  // Catch normal Errors
   if (err instanceof Error) {
     console.warn(`Caught Validation Error for ${req.path}:`, err);
     return res.status(500).json({
@@ -99,14 +100,14 @@ app.use(function errorHandler(
   next();
 });
 
-// //handle missing urls
+// // Handle missing URLs
 // app.use(function notFoundHandler(_req, res: Response) {
 //   res.status(404).send({
 //     message: "Not Found",
 //   });
 // });
 
-//create typeorm connection and run server
+// Create TypeORM connection and run server
 createConnection(dbConfig)
   .then((_connection) => {
     app.listen(PORT, () => {
