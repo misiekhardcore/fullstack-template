@@ -277,6 +277,7 @@ export class UserService {
       // Try to find user with reset token
       const user = await this.userRepository.findOne({
         resetPasswordToken,
+        resetPasswordExp: MoreThan(new Date(Date.now())),
       });
 
       // If user not found throw error
@@ -285,8 +286,23 @@ export class UserService {
       // set new user password
       user.password = password;
       await user.hashPassword();
-      await this.userRepository.save(user);
+      await user.save();
 
+      // Prepare html for reset password email
+      const html = `
+    <h1>Welcome, ${user.username}</h1>
+    <p>Your password just has been changed</p>
+    `;
+
+      // Try to send email
+      await sendMail(
+        user.email,
+        "Password change successful",
+        "Your password has been changed",
+        html
+      );
+
+      // If successfully sent an email then return success message
       return { message: "Password reset successful" };
     } catch (error) {
       // Throw ValidateError error
