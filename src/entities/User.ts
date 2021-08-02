@@ -1,5 +1,5 @@
 import argon2 from "argon2";
-import { IsEmail } from "class-validator";
+import { IsEmail, Length, Min } from "class-validator";
 import { randomBytes } from "crypto";
 import jwt from "jsonwebtoken";
 import { pick } from "lodash";
@@ -28,7 +28,20 @@ export type TPartialUser = {
 };
 
 /**
- * User model for the database
+ * @class
+ * @classdesc User model for the database
+ * @property {number} id numeric id from autoincremental primary key column
+ * @property {string} username username
+ * @property {string|null} firstName firstname
+ * @property {string|null} lastName lastname
+ * @property {string} email email address
+ * @property {UserAddress|null} address address information
+ * @property {boolean} verified User id
+ * @property {string|null} verificationCode User id
+ * @property {string|null} resetPasswordToken User id
+ * @property {Date} resetPasswordExp User id
+ * @property {Date} createdAt User id
+ * @property {Date} updatedAt User id
  */
 @Entity({ name: "users" })
 export class User extends BaseEntity {
@@ -36,19 +49,24 @@ export class User extends BaseEntity {
   id!: number;
 
   @Column()
+  @Length(6, 30)
   username: string;
 
   @Column({ type: "text", nullable: true })
+  @Length(1, 30)
   firstName: string | null;
 
   @Column({ type: "text", nullable: true })
+  @Length(1, 30)
   lastName: string | null;
 
   @Column({ unique: true })
+  @Length(1, 60)
   @IsEmail()
   email: string;
 
   @Column({ select: false })
+  @Min(6)
   password: string;
 
   @OneToOne((_type) => UserAddress, {
@@ -75,21 +93,36 @@ export class User extends BaseEntity {
   @UpdateDateColumn()
   updatedAt!: Date;
 
+  /**
+   * Hashes users password with argon2 algorithm. Runs automatically before new user creation
+   */
   @BeforeInsert()
   // @BeforeUpdate()
   async hashPassword(): Promise<void> {
     this.password = await argon2.hash(this.password);
   }
 
+  /**
+   * Generates verification code for every new user. Code is sent by email to verify new user account
+   */
   @BeforeInsert()
   async verificationCodeGen(): Promise<void> {
     this.verificationCode = randomBytes(20).toString("hex");
   }
 
+  /**
+   * Checks if sent plain password matches encrypted one
+   * @param {string} password plain password to check with encrypted password from database
+   * @returns {boolean} Returns with true if password is correct
+   */
   async comparePassword(password: string): Promise<boolean> {
     return await argon2.verify(this.password, password);
   }
 
+  /**
+   * Generates JWT token for login request
+   * @returns {string} JWT token with encoded basic user info
+   */
   generateJWT(): string {
     const payload: TJWTPayload = {
       username: this.username,
@@ -105,11 +138,18 @@ export class User extends BaseEntity {
     );
   }
 
+  /**
+   * Generates resetPasswordToken whitch is used to reset users password. Sets reset token expiration time
+   */
   generatePasswordReset() {
     this.resetPasswordExp = new Date(Date.now() + 36000000);
     this.resetPasswordToken = randomBytes(20).toString("hex");
   }
 
+  /**
+   * Returns only basic user info
+   * @returns {TPartialUser} Returns basic user info
+   */
   getUserInfo(): TPartialUser {
     return pick(this, ["id", "username", "email", "verified"]);
   }
