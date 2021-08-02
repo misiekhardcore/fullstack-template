@@ -70,6 +70,12 @@ RegisterRoutes(app);
 // Serve JSDoc files
 app.use("/docs/code", express.static(join(__dirname, "../out")));
 
+// Serve React app
+app.use(express.static(join(__dirname, "..", "frontend/build")));
+// app.use((_, res, __) => {
+//   res.sendFile(join(__dirname, "..", "frontend/build", "index.html"));
+// });
+
 // Handle errors
 app.use(function errorHandler(
   err: unknown,
