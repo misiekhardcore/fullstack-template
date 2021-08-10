@@ -1,27 +1,31 @@
 import {
-  SocialLinksService,
-  TSocialLinksCreatePayload,
-} from "../services/socialLinks";
-import {
-  Body,
   Controller,
+  FormField,
   Post,
   Request,
+  Response,
   Route,
   Security,
   Tags,
+  UploadedFile,
 } from "tsoa";
+import { User } from "../entities";
 import { Profile } from "../entities/Profile";
 import {
   ProfileService,
   TProfileCreatePayload,
 } from "../services/profile";
-import { User } from "../entities";
+import {
+  SocialLinksService,
+  TSocialLinksCreatePayload,
+} from "../services/socialLinks";
+import upload from "../utils/uploadImage";
 
-export type TCreateProfilePayload = {
-  profile: Omit<TProfileCreatePayload, "user" | "socials">;
-  socialLinks: TSocialLinksCreatePayload;
-};
+export type TCreateProfilePayload = Omit<
+  TProfileCreatePayload,
+  "user" | "socials"
+> &
+  TSocialLinksCreatePayload;
 
 /**
  * Profile controller
@@ -46,21 +50,29 @@ export class ProfileController extends Controller {
   @Post("/")
   @Security("jwt")
   public async createProfile(
-    @Body() payload: TCreateProfilePayload,
-    @Request() req: Express.Request
+    @FormField() facebook: string,
+    @FormField() twitter: string,
+    @FormField() github: string,
+    @FormField() linkedin: string,
+    @UploadedFile() avatar: Express.Multer.File,
+    @Request() req: any
   ): Promise<Profile> {
+    // Prepare file to upload
+    const res: any = {};
+    upload.single("avatar")(req, res, (err) => {
+      console.log(err);
+    });
     // Geting User
     const user = req.user;
-    console.log(user);
 
     // Create new SocialLinks
     const socialLinks = await this.socialLinksService.createSocialLinks(
-      payload.socialLinks
+      { facebook: "", github: "", twitter: "", linkedin: "" }
     );
 
     // Create profile using SocialLinks and User
     const profile = await this.profileService.createProfile({
-      ...payload.profile,
+      avatar: "filename",
       socials: socialLinks,
       user: new User(),
     });
