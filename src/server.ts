@@ -27,6 +27,7 @@ const app: Application = express();
 
 // Set basic middlewares
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(morgan("tiny"));
 app.use(express.static("public"));
 authenticateUser(passport);
