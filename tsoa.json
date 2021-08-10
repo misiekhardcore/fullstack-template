@@ -3,17 +3,22 @@
   "noImplicitAdditionalProperties": "throw-on-extras",
   "controllerPathGlobs": ["src/controllers/**/*.ts"],
   "spec": {
+    "basePath": "/",
+    "description": "",
+    "outputDirectory": "public",
+    "specVersion": 3,
+    "specMerging": "recursive",
     "securityDefinitions": {
       "jwt": {
         "type": "apiKey",
         "name": "Authorization",
         "in": "header"
       }
-    },
-    "outputDirectory": "public",
-    "specVersion": 3
+    }
   },
   "routes": {
+    "basePath": "/",
+    "middleware": "express",
     "authenticationModule": "src/middlewares/auth.ts",
     "routesDir": "src/routes"
   },
