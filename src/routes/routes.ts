@@ -12,6 +12,8 @@ import { ProfileController } from './../controllers/profile';
 import { UserController } from './../controllers/user';
 import { expressAuthentication } from './../middlewares/auth';
 import * as express from 'express';
+const multer = require('multer');
+const upload = multer();
 
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
@@ -163,26 +165,6 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Pick_TProfileCreatePayload.Exclude_keyofTProfileCreatePayload.user-or-socials__": {
-        "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"avatar":{"dataType":"string"}},"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Omit_TProfileCreatePayload.user-or-socials_": {
-        "dataType": "refAlias",
-        "type": {"ref":"Pick_TProfileCreatePayload.Exclude_keyofTProfileCreatePayload.user-or-socials__","validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "TSocialLinksCreatePayload": {
-        "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"github":{"dataType":"string"},"linkedin":{"dataType":"string"},"twitter":{"dataType":"string"},"facebook":{"dataType":"string"}},"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "TCreateProfilePayload": {
-        "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"socialLinks":{"ref":"TSocialLinksCreatePayload","required":true},"profile":{"ref":"Omit_TProfileCreatePayload.user-or-socials_","required":true}},"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "TPartialUser": {
         "dataType": "refAlias",
         "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"verified":{"dataType":"boolean","required":true},"username":{"dataType":"string","required":true},"email":{"dataType":"string","required":true},"id":{"dataType":"double","required":true}},"validators":{}},
@@ -310,9 +292,14 @@ export function RegisterRoutes(app: express.Router) {
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/profiles',
             authenticateMiddleware([{"jwt":[]}]),
+            upload.single('avatar'),
             function ProfileController_createProfile(request: any, response: any, next: any) {
             const args = {
-                    payload: {"in":"body","name":"payload","required":true,"ref":"TCreateProfilePayload"},
+                    facebook: {"in":"formData","name":"facebook","required":true,"dataType":"string"},
+                    twitter: {"in":"formData","name":"twitter","required":true,"dataType":"string"},
+                    github: {"in":"formData","name":"github","required":true,"dataType":"string"},
+                    linkedin: {"in":"formData","name":"linkedin","required":true,"dataType":"string"},
+                    _avatar: {"in":"formData","name":"avatar","required":true,"dataType":"file"},
                     req: {"in":"request","name":"req","required":true,"dataType":"object"},
             };
 
