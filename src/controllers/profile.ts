@@ -3,7 +3,6 @@ import {
   FormField,
   Post,
   Request,
-  Response,
   Route,
   Security,
   Tags,
@@ -19,7 +18,6 @@ import {
   SocialLinksService,
   TSocialLinksCreatePayload,
 } from "../services/socialLinks";
-import upload from "../utils/uploadImage";
 
 export type TCreateProfilePayload = Omit<
   TProfileCreatePayload,
@@ -54,25 +52,20 @@ export class ProfileController extends Controller {
     @FormField() twitter: string,
     @FormField() github: string,
     @FormField() linkedin: string,
-    @UploadedFile() avatar: Express.Multer.File,
+    @UploadedFile("avatar") avatar: Express.Multer.File,
     @Request() req: any
   ): Promise<Profile> {
-    // Prepare file to upload
-    const res: any = {};
-    upload.single("avatar")(req, res, (err) => {
-      console.log(err);
-    });
     // Geting User
     const user = req.user;
 
     // Create new SocialLinks
     const socialLinks = await this.socialLinksService.createSocialLinks(
-      { facebook: "", github: "", twitter: "", linkedin: "" }
+      { facebook, github, twitter, linkedin }
     );
 
     // Create profile using SocialLinks and User
     const profile = await this.profileService.createProfile({
-      avatar: "filename",
+      avatar: avatar.originalname,
       socials: socialLinks,
       user: new User(),
     });
