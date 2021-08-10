@@ -45,6 +45,6 @@
     "predev": "yarn run swagger",
     "prebuild": "yarn run swagger",
     "dev": "ts-node-dev src/server.ts",
-    "swagger": "tsoa spec"
+    "swagger": "tsoa spec-and-routes"
   }
 }
